@@ -21,8 +21,8 @@ type Function struct {
 	ReturnSize uintptr
 }
 type structArg struct {
-	mem  Pointer
-	size uintptr
+	Mem  Pointer
+	Size uintptr
 }
 
 // Func creates a WASM function with a return type.
@@ -100,7 +100,7 @@ func (fn Function) Call(inputs ...any) (ReturnValue, []Pointer) {
 	for _, i := range inputs {
 		switch t := i.(type) {
 		case structArg:
-			freeList = append(freeList, t.mem)
+			freeList = append(freeList, t.Mem)
 		}
 	}
 
@@ -112,7 +112,7 @@ func (fn Function) Call(inputs ...any) (ReturnValue, []Pointer) {
 	}
 	for _, input := range inputs {
 		if sa, ok := input.(structArg); ok {
-			arguments = append(arguments, sa.mem)
+			arguments = append(arguments, sa.Mem)
 		} else if s, ok := input.(string); ok { // convert to C string char *
 			ptr := ToCharPointer(s)
 			freeList = append(freeList, ptr)

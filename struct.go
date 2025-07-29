@@ -50,11 +50,11 @@ func BytesToStruct[T any](b []byte) T {
 // Convert struct to a struct argument
 func Struct[T any](t T) structArg {
 	return structArg{
-		mem: copyToWASM(StructToBytes(t)), size: unsafe.Sizeof(t),
+		Mem: copyToWASM(StructToBytes(t)), Size: unsafe.Sizeof(t),
 	}
 }
 
-// Read a struct from a Return value
+// Read a struct from a Return Value
 func ReadStruct[T any](r ReturnValue) T {
 	v, ok := r.([]byte)
 	if !ok {
