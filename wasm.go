@@ -12,7 +12,7 @@ var (
 
 type None struct{}
 type ReturnValue any
-type Pointer = uintptr
+type Pointer = uint32
 
 type Function struct {
 	Name       string
