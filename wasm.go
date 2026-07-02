@@ -3,6 +3,7 @@ package wasm
 import (
 	"reflect"
 	"syscall/js"
+	"unsafe"
 )
 
 var (
@@ -117,6 +118,23 @@ func (fn Function) Call(inputs ...any) (ReturnValue, []Pointer) {
 			ptr := ToCharPointer(s)
 			freeList = append(freeList, ptr)
 			arguments = append(arguments, ptr)
+		} else if rv := reflect.ValueOf(input); rv.Kind() == reflect.Slice {
+			// Array arguments follow raylib's (T *ptr, int count) convention:
+			// copy the slice into wasm memory, then pass the pointer followed
+			// by the element count.
+			//
+			// TODO: reuse a persistent, grow-on-demand scratch buffer instead of
+			// Malloc/Free per call to avoid allocation churn on hot per-frame
+			// array calls. Implement later.
+			n := rv.Len()
+			var ptr Pointer
+			if n > 0 {
+				elemSize := rv.Type().Elem().Size()
+				data := unsafe.Slice((*byte)(rv.UnsafePointer()), uintptr(n)*elemSize)
+				ptr = copyToWASM(data)
+				freeList = append(freeList, ptr)
+			}
+			arguments = append(arguments, ptr, int32(n))
 		} else {
 			arguments = append(arguments, input)
 		}
